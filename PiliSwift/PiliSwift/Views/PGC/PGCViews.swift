@@ -73,7 +73,7 @@ private struct PGCContentView: View {
                                         .font(.subheadline)
                                     Spacer()
                                     Image(systemName: "play.circle")
-                                        .foregroundStyle(.accentColor)
+                                        .foregroundStyle(Color.accentColor)
                                 }
                                 .padding(.vertical, 8)
                             }

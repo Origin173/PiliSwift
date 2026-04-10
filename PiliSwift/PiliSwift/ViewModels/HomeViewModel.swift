@@ -27,7 +27,7 @@ final class HomeViewModel {
     }
 
     private func fetchRecommend(refresh: Bool) async {
-        let result = await LoadingState.run {
+        let result = await LoadingState<[RecVideoItem]>.run {
             let params: [String: String] = [
                 "fresh_type": "3",
                 "version": "1",

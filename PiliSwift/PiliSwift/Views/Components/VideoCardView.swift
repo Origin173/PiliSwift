@@ -29,16 +29,14 @@ struct VideoCardView: View {
                 .aspectRatio(16/9, contentMode: .fill)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(alignment: .bottomTrailing) {
-                    if let duration = item.duration {
-                        Text(duration.formattedDuration)
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(.black.opacity(0.7))
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                            .padding(4)
-                    }
+                    Text(item.duration.formattedDuration)
+                        .font(.caption2.bold())
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(.black.opacity(0.7))
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .padding(4)
                 }
 
                 // 标题
@@ -49,17 +47,13 @@ struct VideoCardView: View {
 
                 // UP 主 + 播放量
                 HStack(spacing: 6) {
-                    if let owner = item.owner {
-                        Text(owner.name)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                    Text(item.owner.name)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     Spacer()
-                    if let view = item.stat?.view {
-                        Label(view.shortFormatted, systemImage: "play.fill")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                    Label(item.stat.view.shortFormatted, systemImage: "play.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }

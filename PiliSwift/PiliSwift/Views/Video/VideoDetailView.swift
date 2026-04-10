@@ -221,7 +221,7 @@ private struct VideoActionButton: View {
             VStack(spacing: 4) {
                 Image(systemName: isActive ? activeIcon : icon)
                     .font(.title3)
-                    .foregroundStyle(isActive ? .accentColor : .secondary)
+                    .foregroundStyle(isActive ? Color.accentColor : Color.secondary)
                 Text(label)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

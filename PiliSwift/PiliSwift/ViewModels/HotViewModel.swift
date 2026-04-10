@@ -22,7 +22,7 @@ final class HotViewModel {
     }
 
     private func fetch(refresh: Bool) async {
-        let result = await LoadingState.run {
+        let result = await LoadingState<[RecVideoItem]>.run {
             let params = ["pn": "\(pn)", "ps": "\(ps)"]
             let resp: APIResponse<HotData> = try await APIClient.shared.get(
                 APIEndpoints.popularFeed, params: params

@@ -76,7 +76,7 @@ private struct VideoHotRowView: View {
                     HStack {
                         Image(systemName: "play.fill")
                             .font(.caption2)
-                        Text(item.stat?.view.shortFormatted ?? "")
+                        Text(item.stat.view.shortFormatted)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

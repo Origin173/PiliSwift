@@ -6,33 +6,33 @@ import Foundation
 enum Route: Hashable {
     // MARK: - 视频
     case videoDetail(VideoDetailParams)
-    case audio(Int64)                           // aid/bvid
+    case audio(aid: Int64)                      // aid/bvid
 
     // MARK: - 用户空间
-    case member(Int64)                          // mid
-    case memberHome(Int64)
-    case memberDynamics(Int64)
-    case memberVideo(Int64)
-    case memberAudio(Int64)
-    case memberArticle(Int64)
-    case memberOpus(Int64)
-    case memberPgc(Int64)
-    case memberSeason(Int64)
-    case memberSearch(Int64)
-    case memberGuard(Int64)
-    case memberShop(Int64)
-    case memberFavorite(Int64)
-    case memberCheese(Int64)
-    case memberComic(Int64)
-    case memberUpowerRank(Int64)
-    case memberContribute(Int64)
+    case member(mid: Int64)
+    case memberHome(mid: Int64)
+    case memberDynamics(mid: Int64)
+    case memberVideo(mid: Int64)
+    case memberAudio(mid: Int64)
+    case memberArticle(mid: Int64)
+    case memberOpus(mid: Int64)
+    case memberPgc(mid: Int64)
+    case memberSeason(mid: Int64)
+    case memberSearch(mid: Int64)
+    case memberGuard(mid: Int64)
+    case memberShop(mid: Int64)
+    case memberFavorite(mid: Int64)
+    case memberCheese(mid: Int64)
+    case memberComic(mid: Int64)
+    case memberUpowerRank(mid: Int64)
+    case memberContribute(mid: Int64)
     case memberProfile
-    case upowerRank(Int64)
+    case upowerRank(mid: Int64)
     case spaceSetting
 
     // MARK: - 搜索
     case search
-    case searchResult(String)                   // keyword
+    case searchResult(keyword: String)
     case searchTrending
 
     // MARK: - 动态
@@ -44,41 +44,41 @@ enum Route: Hashable {
     case hot
     case rank
     case live
-    case liveRoom(Int64)                        // roomId
+    case liveRoom(roomId: Int64)
     case liveArea
-    case liveAreaDetail(Int64, String)          // parentId, areaName
+    case liveAreaDetail(parentId: Int64, areaName: String)
 
     // MARK: - 收藏
-    case fav(Int64)                             // mid
-    case favDetail(Int64, String)               // mediaId, title
+    case fav(mid: Int64)
+    case favDetail(id: Int64, title: String)
 
     // MARK: - 历史 & 稍后再看
     case history
     case later
 
     // MARK: - 关注 & 粉丝
-    case follow(Int64)                          // mid
-    case followed(Int64)
-    case fan(Int64)
-    case followSearch(Int64)
-    case sameFollowing(Int64)
+    case follow(mid: Int64)
+    case followed(mid: Int64)
+    case fan(mid: Int64)
+    case followSearch(mid: Int64)
+    case sameFollowing(mid: Int64)
 
     // MARK: - 消息
     case whisper
-    case whisperDetail(Int64)                   // talkerId
+    case whisperDetail(talkerId: Int64)
     case replyMe
     case atMe
     case likeMe
     case sysMsg
     case myReply
-    case mainReply(MainReplyParams)
+    case mainReply(params: MainReplyParams)
 
     // MARK: - PGC / 番剧
-    case pgc(Int64)                             // seasonId
+    case pgc(seasonId: Int64)
     case pgcIndex
-    case pgcReview(Int64)                       // seasonId
+    case pgcReview(seasonId: Int64)
     case subscription
-    case subscription_detail(Int64)             // seasonId
+    case subscription_detail(seasonId: Int64)
 
     // MARK: - 设置
     case setting
@@ -96,17 +96,17 @@ enum Route: Hashable {
     // MARK: - 其他
     case login
     case about
-    case article(Int64)                         // article id
-    case articleList(Int64)                     // mid
+    case article(id: Int64)
+    case articleList(mid: Int64)
     case download
-    case webview(URL)
+    case webview(url: URL)
     case blacklist
     case danmakuBlock
     case sponsorBlock
     case music
     case dlna
     case webdav
-    case matchInfo(String)                      // match id
+    case matchInfo(id: String)
     case popularSeries
     case popularPrecious
     case loginDevices

@@ -4,7 +4,7 @@ import Foundation
 // 映射自 lib/models/fav/fav_folder.dart
 
 struct FavFolder: Codable, Identifiable, Hashable {
-    var id: Int64 { mediaId }
+    var id: Int64 { mediaId ?? fid ?? 0 }
 
     let mediaId: Int64?
     let fid: Int64?
@@ -48,7 +48,7 @@ struct FavDetailResponse: Codable {
     let medias: [FavMedia]?
 
     struct FavMedia: Codable, Identifiable {
-        var id: Int64 { bvid.hashValue as? Int64 ?? 0 }
+        var id: Int64 { Int64(bvid.hashValue) }
         let bvid: String
         let title: String?
         let cover: String?

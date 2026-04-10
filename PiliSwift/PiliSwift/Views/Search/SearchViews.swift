@@ -108,7 +108,7 @@ struct SearchResultView: View {
                                        description: Text(msg ?? ""))
             }
         }
-        .navigationTitle(""\(keyword)"")
+        .navigationTitle(keyword)
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.search() }
     }

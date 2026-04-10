@@ -16,7 +16,7 @@ struct LoginView: View {
                 // Logo
                 Image(systemName: "play.tv")
                     .font(.system(size: 72))
-                    .foregroundStyle(.accentColor)
+                    .foregroundStyle(Color.accentColor)
 
                 Text("登录到 Bilibili")
                     .font(.title2.bold())
@@ -83,7 +83,7 @@ struct AboutView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "play.tv.fill")
                             .font(.system(size: 60))
-                            .foregroundStyle(.accentColor)
+                            .foregroundStyle(Color.accentColor)
                         Text("PiliSwift")
                             .font(.title2.bold())
                         Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")

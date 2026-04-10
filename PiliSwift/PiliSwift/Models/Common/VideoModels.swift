@@ -235,16 +235,31 @@ struct SearchResultItem: Codable, Identifiable {
 // MARK: - 动态模型（简化基础结构）
 // 映射自 lib/models_new/dynamic/ 系列
 
-struct DynamicItem: Codable, Identifiable, Hashable {
+final class DynamicItem: Codable, Identifiable, Hashable {
     var id: String { idStr }
     let idStr: String
     let type: String?
     let modules: DynamicModules?
     let orig: DynamicItem?              // 转发原动态
 
+    init(idStr: String, type: String?, modules: DynamicModules?, orig: DynamicItem?) {
+        self.idStr = idStr
+        self.type = type
+        self.modules = modules
+        self.orig = orig
+    }
+
     enum CodingKeys: String, CodingKey {
         case idStr = "id_str"
         case type, modules, orig
+    }
+
+    static func == (lhs: DynamicItem, rhs: DynamicItem) -> Bool {
+        lhs.idStr == rhs.idStr
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(idStr)
     }
 }
 

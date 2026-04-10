@@ -42,7 +42,7 @@ private struct DynamicItemDetailCard: View {
             // 作者
             if let author = item.modules?.moduleAuthor {
                 HStack(spacing: 10) {
-                    AsyncImage(url: URL(string: author.face ?? "")) { img in
+                    AsyncImage(url: URL(string: author.face)) { img in
                         img.resizable()
                     } placeholder: {
                         Circle().fill(.fill.secondary)
@@ -51,9 +51,9 @@ private struct DynamicItemDetailCard: View {
                     .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(author.name ?? "")
+                        Text(author.name)
                             .font(.subheadline.bold())
-                        Text(author.pubTimeText ?? "")
+                        Text(author.pubTimeText)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

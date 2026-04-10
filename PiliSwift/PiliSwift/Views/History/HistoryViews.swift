@@ -115,15 +115,13 @@ struct VideoRowView: View {
                     .font(.subheadline)
                     .lineLimit(2)
                 HStack {
-                    Text(item.owner?.name ?? "")
+                    Text(item.owner.name)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    if let view = item.stat?.view {
-                        Label(view.shortFormatted, systemImage: "play.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+                    Label(item.stat.view.shortFormatted, systemImage: "play.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
