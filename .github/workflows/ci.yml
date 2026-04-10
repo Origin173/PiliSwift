@@ -45,6 +45,86 @@ jobs:
             -project PiliSwift.xcodeproj \
             -scheme PiliSwift
 
+      - name: Create iOS Simulator
+        run: |
+          SIMULATOR_UDID="$(python3 <<'PY'
+          import json
+          import subprocess
+
+          runtimes = json.loads(
+            subprocess.check_output(
+              ["xcrun", "simctl", "list", "runtimes", "--json"],
+              text=True,
+            )
+          )["runtimes"]
+
+          ios_runtimes = []
+          for runtime in runtimes:
+            name = runtime.get("name", "")
+            if not name.startswith("iOS "):
+              continue
+            if runtime.get("isAvailable") is False:
+              continue
+
+            version = runtime.get("version", "0")
+            try:
+              sort_key = tuple(int(part) for part in version.split("."))
+            except ValueError:
+              sort_key = (0,)
+
+            ios_runtimes.append((sort_key, runtime["identifier"]))
+
+          if not ios_runtimes:
+            raise SystemExit("No available iOS Simulator runtimes found.")
+
+          runtime_id = max(ios_runtimes)[1]
+
+          device_types = json.loads(
+            subprocess.check_output(
+              ["xcrun", "simctl", "list", "devicetypes", "--json"],
+              text=True,
+            )
+          )["devicetypes"]
+
+          preferred_names = [
+            "iPhone 16",
+            "iPhone 16 Pro",
+            "iPhone 16 Pro Max",
+            "iPhone 15",
+            "iPhone 15 Pro",
+          ]
+
+          device_type_id = None
+          for preferred_name in preferred_names:
+            for device_type in device_types:
+              if device_type.get("name") == preferred_name:
+                device_type_id = device_type["identifier"]
+                break
+            if device_type_id is not None:
+              break
+
+          if device_type_id is None:
+            for device_type in device_types:
+              if device_type.get("name", "").startswith("iPhone "):
+                device_type_id = device_type["identifier"]
+                break
+
+          if device_type_id is None:
+            raise SystemExit("No iPhone simulator device type found.")
+
+          print(
+            subprocess.check_output(
+              ["xcrun", "simctl", "create", "PiliSwift-CI", device_type_id, runtime_id],
+              text=True,
+            ).strip()
+          )
+          PY
+          )"
+          echo "SIMULATOR_UDID=${SIMULATOR_UDID}" >> "$GITHUB_ENV"
+          xcrun simctl boot "$SIMULATOR_UDID"
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+          xcrun simctl list devices available
+
       - name: Build (iOS Simulator)
         working-directory: PiliSwift
         run: |
@@ -53,7 +133,7 @@ jobs:
             -project PiliSwift.xcodeproj \
             -scheme PiliSwift \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination "platform=iOS Simulator,id=${SIMULATOR_UDID}" \
             -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
@@ -68,7 +148,7 @@ jobs:
             -project PiliSwift.xcodeproj \
             -scheme PiliSwiftTests \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination "platform=iOS Simulator,id=${SIMULATOR_UDID}" \
             -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
