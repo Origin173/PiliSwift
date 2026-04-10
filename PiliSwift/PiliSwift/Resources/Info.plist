@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- 基础信息 -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>PiliSwift</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>PiliSwift</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
+
+    <!-- 界面 -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+
+    <!-- 支持方向 -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- 状态栏 -->
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+
+    <!-- 高刷新率 -->
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+
+    <!-- 键盘/鼠标支持 -->
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+    <!-- 后台模式：音频 -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+    </array>
+
+    <!-- 权限说明 -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>请允许应用保存图片到相册</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>请允许应用保存图片到相册</string>
+    <key>NSCameraUsageDescription</key>
+    <string>应用需要您的同意才能访问相机</string>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>应用需要您的同意才能访问媒体资料库</string>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>应用需要本地网络权限以支持 DLNA 投屏功能</string>
+
+    <!-- Bonjour 服务（DLNA/UPnP 发现） -->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_ssdp._udp</string>
+        <string>_upnp._tcp</string>
+    </array>
+
+    <!-- 查询白名单 -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>https</string>
+        <string>http</string>
+        <string>bilibili</string>
+    </array>
+
+    <!-- URL Scheme 注册 -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <!-- bilibili:// 自定义 scheme -->
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.piliswift.bilibili</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>bilibili</string>
+            </array>
+        </dict>
+        <!-- HTTPS 链接拦截 -->
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.piliswift.https</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>https</string>
+                <string>http</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Universal Link / Associated Domains 支持域名（需要在 Xcode Capabilities 里开启） -->
+    <!-- m.bilibili.com, www.bilibili.com, bangumi.bilibili.com, live.bilibili.com -->
+
+    <!-- 场景配置（纯 SwiftUI，不需要多场景） -->
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+    </dict>
+</dict>
+</plist>
