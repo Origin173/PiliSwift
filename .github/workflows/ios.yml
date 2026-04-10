@@ -1,60 +1,110 @@
-name: Build for iOS
+name: PiliSwift Release (iOS)
 
 on:
+  push:
+    tags:
+      - 'v*.*.*'
   workflow_call:
     inputs:
       tag:
-        description: "tag"
+        description: "Release tag (e.g. v1.0.0)"
         required: false
         default: ""
         type: string
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0.0，留空则只上传 Artifact)"
+        required: false
+        default: ""
+        type: string
 
 jobs:
-  build-macos-app:
-    name: Release IOS
-    runs-on: macos-26
+  build-ios:
+    name: Build PiliSwift IPA
+    runs-on: macos-15
+    permissions:
+      contents: write
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version-file: pubspec.yaml
-
-      - name: Set and Extract version
-        shell: pwsh
-        run: lib/scripts/build.ps1
-
-      - name: Apply Patch
-        shell: pwsh
-        run: lib/scripts/patch.ps1 iOS
-        continue-on-error: true
-
-      - name: Build iOS
+      - name: Select Xcode 16
         run: |
-          flutter build ios --release --no-codesign --dart-define-from-file=pili_release.json
-          ln -sf ./build/ios/iphoneos Payload
-          # make AltSign happy...
-          find Payload/Runner.app/Frameworks -type d -name "*.framework" -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \;
-          zip -r9 PiliPlus_ios_${{env.version}}.ipa Payload/Runner.app
+          sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          xcodebuild -version
 
-      - name: Release
-        if: ${{ github.event.inputs.tag != '' }}
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: PiliSwift
+        run: xcodegen generate
+
+      - name: Resolve SPM dependencies
+        working-directory: PiliSwift
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project PiliSwift.xcodeproj \
+            -scheme PiliSwift
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            TAG="${GITHUB_REF_NAME}"
+          elif [[ -n "${{ github.event.inputs.tag }}" ]]; then
+            TAG="${{ github.event.inputs.tag }}"
+            VERSION="${TAG#v}"
+          else
+            VERSION="0.0.0-$(git rev-parse --short HEAD)"
+            TAG=""
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}"         >> "$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Archive (unsigned)
+        working-directory: PiliSwift
+        run: |
+          xcodebuild archive \
+            -project PiliSwift.xcodeproj \
+            -scheme PiliSwift \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath ./build/PiliSwift.xcarchive \
+            MARKETING_VERSION="${VERSION}" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+      - name: Package IPA
+        working-directory: PiliSwift
+        run: |
+          mkdir -p Payload
+          cp -r ./build/PiliSwift.xcarchive/Products/Applications/PiliSwift.app Payload/
+          # 对内嵌 Framework 做 ad-hoc 签名（AltStore / Sideloadly 兼容）
+          find Payload/PiliSwift.app/Frameworks -type d -name "*.framework" \
+            -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \; 2>/dev/null || true
+          zip -r9 "../PiliSwift_ios_${VERSION}.ipa" Payload/
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PiliSwift-iOS-${{ steps.version.outputs.version }}
+          path: PiliSwift_ios_*.ipa
+
+      - name: Create GitHub Release
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event.inputs.tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag }}
-          name: ${{ github.event.inputs.tag }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: PiliSwift ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
           files: |
-            PiliPlus_ios_*.ipa
-
-      - name: Upload ios release
-        uses: actions/upload-artifact@v7
-        with:
-          archive: false
-          name: iOS-release
-          path: PiliPlus_ios_*.ipa
+            PiliSwift_ios_*.ipa

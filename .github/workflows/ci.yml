@@ -1,0 +1,75 @@
+name: PiliSwift CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'PiliSwift/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'PiliSwift/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test (Simulator)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select Xcode 16
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Install xcpretty
+        run: gem install xcpretty --no-document
+
+      - name: Generate Xcode project
+        working-directory: PiliSwift
+        run: xcodegen generate
+
+      - name: Resolve SPM dependencies
+        working-directory: PiliSwift
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project PiliSwift.xcodeproj \
+            -scheme PiliSwift
+
+      - name: Build (iOS Simulator)
+        working-directory: PiliSwift
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project PiliSwift.xcodeproj \
+            -scheme PiliSwift \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            | xcpretty
+
+      - name: Run Unit Tests
+        working-directory: PiliSwift
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project PiliSwift.xcodeproj \
+            -scheme PiliSwiftTests \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            | xcpretty
