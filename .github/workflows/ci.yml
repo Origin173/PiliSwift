@@ -48,8 +48,22 @@ jobs:
       - name: Create iOS Simulator
         run: |
           SIMULATOR_UDID="$(python3 <<'PY'
+          import os
+          import re
           import json
           import subprocess
+
+          sdk_info = subprocess.check_output(
+              ["xcodebuild", "-version", "-sdk", "iphonesimulator"],
+              text=True,
+          )
+          sdk_version_match = re.search(r"SDKVersion:\s+([0-9]+(?:\.[0-9]+)*)", sdk_info)
+          if sdk_version_match is None:
+              raise SystemExit("Unable to determine supported iOS Simulator SDK version.")
+
+          sdk_version = sdk_version_match.group(1)
+          sdk_parts = tuple(int(part) for part in sdk_version.split("."))
+          sdk_major = sdk_parts[0]
 
           runtimes = json.loads(
             subprocess.check_output(
@@ -58,7 +72,9 @@ jobs:
             )
           )["runtimes"]
 
-          ios_runtimes = []
+          matching_major_compatible_runtimes = []
+          matching_major_runtimes = []
+          fallback_runtimes = []
           for runtime in runtimes:
             name = runtime.get("name", "")
             if not name.startswith("iOS "):
@@ -72,12 +88,25 @@ jobs:
             except ValueError:
               sort_key = (0,)
 
-            ios_runtimes.append((sort_key, runtime["identifier"]))
+            runtime_entry = (sort_key, runtime["identifier"], version)
+            if sort_key and sort_key[0] == sdk_major and sort_key <= sdk_parts:
+              matching_major_compatible_runtimes.append(runtime_entry)
+            elif sort_key and sort_key[0] == sdk_major:
+              matching_major_runtimes.append(runtime_entry)
+            elif sort_key <= sdk_parts:
+              fallback_runtimes.append(runtime_entry)
 
-          if not ios_runtimes:
-            raise SystemExit("No available iOS Simulator runtimes found.")
+          candidate_runtimes = (
+            matching_major_compatible_runtimes
+            or matching_major_runtimes
+            or fallback_runtimes
+          )
+          if not candidate_runtimes:
+            raise SystemExit(
+              f"No available iOS Simulator runtimes compatible with SDK {sdk_version}."
+            )
 
-          runtime_id = max(ios_runtimes)[1]
+          _, runtime_id, runtime_version = max(candidate_runtimes)
 
           device_types = json.loads(
             subprocess.check_output(
@@ -112,6 +141,7 @@ jobs:
           if device_type_id is None:
             raise SystemExit("No iPhone simulator device type found.")
 
+          print(f"Selected iOS Simulator SDK {sdk_version}; using runtime {runtime_version}.", file=os.sys.stderr)
           print(
             subprocess.check_output(
               ["xcrun", "simctl", "create", "PiliSwift-CI", device_type_id, runtime_id],
@@ -125,6 +155,14 @@ jobs:
           xcrun simctl bootstatus "$SIMULATOR_UDID" -b
           xcrun simctl list devices available
 
+      - name: Show destinations
+        working-directory: PiliSwift
+        run: |
+          xcodebuild -showdestinations \
+            -project PiliSwift.xcodeproj \
+            -scheme PiliSwift \
+            -sdk iphonesimulator
+
       - name: Build (iOS Simulator)
         working-directory: PiliSwift
         run: |
@@ -133,7 +171,7 @@ jobs:
             -project PiliSwift.xcodeproj \
             -scheme PiliSwift \
             -sdk iphonesimulator \
-            -destination "platform=iOS Simulator,id=${SIMULATOR_UDID}" \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
